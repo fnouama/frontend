@@ -1,36 +1,18 @@
-define([
-    'knockout',
-    'underscore',
-    'models/collections/latest-articles',
-    'modules/vars',
-    'utils/mediator',
-    'utils/update-scrollables'
-], function (
-    ko,
-    _,
-    LatestArticles,
-    vars,
-    mediator,
-    updateScrollables
-) {
-    mediator = mediator.default;
+import ko from 'knockout';
+import _ from 'underscore';
+import BaseWidget from 'widgets/base-widget';
+import LatestArticles from 'models/collections/latest-articles';
+import mediator from 'utils/mediator';
+import updateScrollables from 'utils/update-scrollables';
 
-    function Latest (params, element) {
-        var self = this;
+// TODO extend from a base widget
+class Latest extends BaseWidget {
+    constructor(params, element) {
         this.column = params.column;
 
         this.showingDrafts = ko.observable(false);
-        this.showDrafts = function() {
-            self.showingDrafts(true);
-            self.latestArticles.search();
-        };
-        this.showLive = function() {
-            self.showingDrafts(false);
-            self.latestArticles.search();
-        };
 
         this.latestArticles = new LatestArticles({
-            filterTypes: vars.CONST.filterTypes,
             container: element,
             showingDrafts: this.showingDrafts,
             callback: _.once(function () {
@@ -41,18 +23,31 @@ define([
         this.latestArticles.search();
         this.latestArticles.startPoller();
 
-        this.subscriptionOnVars = vars.model.switches.subscribe(function (switches) {
-            if (!switches['facia-tool-draft-content']) {
-                self.showingDrafts(false);
+        this.listeners = mediator.scope();
+        this.listeners.on('switches:change', switches => {
+            if (this.showingDrafts() && !switches['facia-tool-draft-content']) {
+                this.showLive();
             }
         });
         this.subscriptionOnArticles = this.latestArticles.articles.subscribe(updateScrollables);
     }
 
-    Latest.prototype.dispose = function () {
-        this.subscriptionOnArticles.dispose();
-        this.subscriptionOnVars.dispose();
-    };
+    showDrafts() {
+        this.showingDrafts(true);
+        this.latestArticles.search();
+    }
 
-    return Latest;
-});
+    showLive() {
+        this.showingDrafts(false);
+        this.latestArticles.search();
+    }
+
+
+    dispose() {
+        this.subscriptionOnArticles.dispose();
+        this.listeners.dispose();
+        this.latestArticles.dispose();
+    }
+}
+
+export default Latest;

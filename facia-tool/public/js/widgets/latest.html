@@ -27,7 +27,7 @@
 
         <div class="search-form">
             <div class="search-term">
-                <input type="text" placeholder="Search for..." data-bind='
+                <input type="text" class="search--term" placeholder="Search for..." data-bind='
                     event: {keyup: search, afterpaste: search},
                     value: term,
                     valueUpdate: ["afterkeydown", "afterpaste"]'/>
@@ -36,13 +36,13 @@
             <div class="autocompleter dropdown" data-bind="css: {
                 'dropdown-open': !!suggestions().length
             }">
-                <select data-bind="
+                <select class="search--filterType" data-bind="
                     event: { change: clearFilter },
                     options: filterTypes,
                     optionsText: 'display',
                     value: filterType"></select>
 
-                <input type="text" placeholder="filter" data-bind='
+                <input type="text" class="search--filter" placeholder="filter" data-bind='
                     attr: {placeholder: filterType().placeholder},
                     event: {keyup: autoComplete, afterpaste: autoComplete, change: filterChange},
                     value: filter,
@@ -54,7 +54,7 @@
                         <span data-bind="text: _alert"></span>
                         <!-- /ko -->
                         <!-- ko if: $data.id -->
-                        <a data-bind="text: id, click: $parent.setFilter"></a>
+                        <a data-bind="text: id, click: $parent.setFilter.bind($parent)"></a>
                         <!-- /ko -->
                     </li>
                 </ul>
