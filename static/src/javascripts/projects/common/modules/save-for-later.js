@@ -92,9 +92,13 @@ define([
                     }.bind(this));
 
                     if (resp.status === 'error' && resp.errors[0].message === notFound.message && resp.errors[0].description === notFound.description) {
-                        //Identity api needs a string in the format yyyy-mm-ddThh:mm:ss+hh:mm  otherwise it barfs
+                        // this user has never saved anything, so create a new
+                        // data object and save an introductory article for them
+
+                        // Identity api needs a string in the format yyyy-mm-ddThh:mm:ss+hh:mm  otherwise it barfs
                         var date = new Date().toISOString().replace(/\.[0-9]+Z/, '+00:00');
                         this.userData = {version: date, articles: []};
+                        this.saveIntroArticle();
                     } else {
                         this.userData = resp.savedArticles;
                     }
@@ -365,6 +369,13 @@ define([
                 saveForLaterProfileLink.html('Saved for later');
             }
         });
+    };
+
+    SaveForLater.prototype.saveIntroArticle = function () {
+        var pageId = 'politics/blog/live/2015/jun/29/cameron-gives-today-programme-interview-on-tunisia-greece-and-the-eu-politics-live';
+        var shortUrl = '/p/4a7n3';
+
+        this.saveArticle(pageId, shortUrl);
     };
 
     return SaveForLater;
